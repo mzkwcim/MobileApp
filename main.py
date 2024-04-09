@@ -39,7 +39,7 @@ class MainApp(App):
         one_chunk_of_text = ""
 
         for text in text_to_operate_on:
-            if re.match(r'\w+\s+\w+,\s+\d+\s+', text) or text == text_to_operate_on[-1]:
+            if re.match(r'[\w-]+\s+\w+,\s+\d+\s+', text) or text == text_to_operate_on[-1] or re.match(r'[\w-]+\s+\w+\s+,\s+\d+\s+', text):
                 chunks_of_text.append(one_chunk_of_text)
                 one_chunk_of_text = ""
             one_chunk_of_text += text + "\n"

@@ -1,5 +1,6 @@
 import re
 from StringOperator import StringOperator  # Załóżmy, że istnieje moduł string_operator zdefiniowany gdzieś indziej
+from unidecode import unidecode
 
 
 class StringSelectingSystem:
@@ -11,8 +12,10 @@ class StringSelectingSystem:
 
         for chunk in chunks_of_text:
             for c in chunk.split("\n"):
+                #c2 = unidecode(c)
+                #print(c2)
                 swimming_event = ""
-                if re.match(r'\w+,\s+\d+', c) or re.match(r'\d+\w\s', c):
+                if re.match(r'[\w-]+\s+\w+,\s+', c) or re.match(r'\d+\w\s', c) or re.match(r'[\w-]+\s+\w+\s+,\s+', c):
                     distance = re.sub(r'%.+', '', c).split(" ")
                     if '%' in c:
                         swimming_event = f"{distance[0]} {distance[1]}"
