@@ -1,6 +1,8 @@
 class StringGroupingSystem:
     @staticmethod
     def group_by(competition, number):
+        output_text = ""
+
         if number == 1:
             athlete_name = ""
             for start in competition:
@@ -8,9 +10,9 @@ class StringGroupingSystem:
                 current_athlete_name = " ".join(start.split()[0:2])
                 if athlete_name != current_athlete_name:
                     athlete_name = current_athlete_name
-                    print(f"{athlete_name}\n{rest}")
+                    output_text += f"{athlete_name}\n{rest}\n"
                 else:
-                    print(rest)
+                    output_text += f"{rest}\n"
         else:
             grouped_by_distance = {}
             for s in competition:
@@ -21,11 +23,11 @@ class StringGroupingSystem:
                     grouped_by_distance[distance_key] = [s]
 
             for distance, strings in grouped_by_distance.items():
-                print(distance)
+                output_text += f"{distance}\n"
                 for string in strings:
-                    print(string)
-                print()
-
+                    output_text += f"{' '.join(string.split(' ')[:2] + string.split(' ')[4:]).strip()}\n"
+                output_text += "\n"
+        return output_text
     @staticmethod
     def get_distance_key(string):
         return " ".join(string.split()[2:4])
