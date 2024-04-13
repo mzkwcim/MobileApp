@@ -1,47 +1,52 @@
 from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.popup import Popup
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
+from kivy.uix.filechooser import FileChooserListView
+from kivy.clock import mainthread  # Import mainthread decorator
+import re
 from PDFReader import PDFReader
 from StringGroupingSystem import StringGroupingSystem
 from StringSelectingSystem import StringSelectingSystem
-import re
+from CustomScrollView import CustomScrollView
 
 
-class CustomScrollView(ScrollView):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.label = None
-        self.bind(scroll_y=self.on_scroll_y)
-
-    def on_scroll_y(self, instance, value):
-        if self.label:
-            self.label.height = max(self.label.parent.height, self.label.texture_size[1])
-
-
-class CustomLabel(Label):
-    pass
-
-
-class MainApp(App):
+class PDFParserApp(App):
     def build(self):
-        layout = BoxLayout(orientation='vertical')
+        self.layout = BoxLayout(orientation='vertical')
+        self.current_view = None
 
-        label = Label(text="Chcesz pogrupować wyniki po zawodnikach czy po dystansach?")
-        layout.add_widget(label)
+        self.file_chooser = FileChooserListView(filters=["*.pdf"])
+        self.layout.add_widget(self.file_chooser)
 
-        # Przyciski do wyboru
-        button_athletes = Button(text='Zawodnicy', on_press=self.on_button_athletes_press)
-        button_distances = Button(text='Dystanse', on_press=self.on_button_distances_press)
+        select_button = Button(text="Select File", size_hint=(1, None), height=50)
+        select_button.bind(on_press=self.display_grouping_options)
+        self.layout.add_widget(select_button)
 
-        # Dodawanie przycisków do interfejsu
-        layout.add_widget(button_athletes)
-        layout.add_widget(button_distances)
+        self.file_path_label = Label(text="")
+        self.layout.add_widget(self.file_path_label)
 
-        return layout
+        return self.layout
+
+    @mainthread
+    def display_grouping_options(self, instance):
+        selected_file = self.file_chooser.selection and self.file_chooser.selection[0] or ""
+        if selected_file:
+            self.layout.clear_widgets()
+
+            self.file_path_label.text = selected_file
+            self.layout.add_widget(self.file_path_label)
+
+            label = Label(text="Chcesz pogrupować wyniki po zawodnikach czy po dystansach?")
+            self.layout.add_widget(label)
+
+            button_athletes = Button(text='Zawodnicy', on_press=self.on_button_athletes_press)
+            button_distances = Button(text='Dystanse', on_press=self.on_button_distances_press)
+            button_exit = Button(text='Wyjście', on_press=self.exit_app)
+
+            self.layout.add_widget(button_athletes)
+            self.layout.add_widget(button_distances)
+            self.layout.add_widget(button_exit)
 
     def on_button_athletes_press(self, instance):
         self.number = 1
@@ -52,34 +57,47 @@ class MainApp(App):
         self.process_choice()
 
     def process_choice(self):
-        text_to_operate_on = PDFReader.get_text_from_pdf()  # Assuming this method returns a list of text chunks
-        chunks_of_text = []
-        one_chunk_of_text = ""
+        selected_file = self.file_chooser.selection and self.file_chooser.selection[0] or ""
+        if selected_file:
+            text_to_operate_on = PDFReader.get_text_from_pdf(selected_file)
 
-        for text in text_to_operate_on:
-            if re.match(r'[\w-]+\s+\w+,\s+\d+\s+', text) or text == text_to_operate_on[-1] or re.match(
-                    r'[\w-]+\s+\w+\s+,\s+\d+\s+', text):
-                chunks_of_text.append(one_chunk_of_text)
-                one_chunk_of_text = ""
-            one_chunk_of_text += text + "\n"
+            chunks_of_text = []
+            one_chunk_of_text = ""
 
-        # Call the appropriate methods for grouping and selecting important strings
-        output_text = StringGroupingSystem.group_by(StringSelectingSystem.select_important_string(chunks_of_text),
-                                                    self.number)
-        print(output_text)
-        output_label = Label(text=output_text)
+            for text in text_to_operate_on:
+                if re.match(r'[\w-]+\s+\w+,\s+\d+\s+', text) or text == text_to_operate_on[-1] or re.match(
+                        r'[\w-]+\s+\w+\s+,\s+\d+\s+', text):
+                    chunks_of_text.append(one_chunk_of_text)
+                    one_chunk_of_text = ""
+                one_chunk_of_text += text + "\n"
 
-        # Create a new window to display the output
-        popup_layout = GridLayout(cols=1)
-        output_label = CustomLabel(text=output_text, size_hint_y=None)
+            output_text = StringGroupingSystem.group_by(StringSelectingSystem.select_important_string(chunks_of_text),
+                                                        self.number)
+            print(output_text)
+
+            self.display_output(output_text)
+
+    @mainthread
+    def display_output(self, output_text):
+        self.layout.clear_widgets()
+
         scroll_view = CustomScrollView(size_hint=(1, 0.9))
-        scroll_view.label = output_label
-        scroll_view.add_widget(output_label)
-        popup_layout.add_widget(scroll_view)
+        self.layout.add_widget(scroll_view)
 
-        popup = Popup(title='Output', content=popup_layout, size_hint=(None, None), size=(400, 400))
-        popup.open()
+        scroll_view.update_output_text(output_text)
+
+        copy_button = Button(text='Kopiuj do schowka', size_hint=(1, None), height=50)
+        copy_button.bind(on_press=scroll_view.copy_to_clipboard)
+        self.layout.add_widget(copy_button)
+
+        back_button = Button(text='Wróć do menu', size_hint=(1, None), height=50)
+        back_button.bind(on_press=self.display_grouping_options)
+        self.layout.add_widget(back_button)
+
+    @staticmethod
+    def exit_app(self, instance):
+        App.get_running_app().stop()
 
 
-if __name__ == "__main__":
-    MainApp().run()
+if __name__ == '__main__':
+    PDFParserApp().run()

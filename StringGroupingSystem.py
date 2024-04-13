@@ -28,6 +28,7 @@ class StringGroupingSystem:
                     output_text += f"{' '.join(string.split(' ')[:2] + string.split(' ')[4:]).strip()}\n"
                 output_text += "\n"
         return output_text
+
     @staticmethod
     def get_distance_key(string):
         return " ".join(string.split()[2:4])

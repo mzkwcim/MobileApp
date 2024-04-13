@@ -4,10 +4,9 @@ import re
 
 class PDFReader:
     @staticmethod
-    def get_text_from_pdf():
-        path = "C:\\users\\mzkwcim\\desktop\\MDMM.pdf"
+    def get_text_from_pdf(selected_file):
         text = ""
-        with open(path, "rb") as pdf_file:
+        with open(selected_file, "rb") as pdf_file:
             pdf_reader = PyPDF2.PdfReader(pdf_file)
             for page_number in range(1, len(pdf_reader.pages) + 1):
                 page = pdf_reader.pages[page_number - 1]

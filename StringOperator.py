@@ -1,7 +1,7 @@
 class StringOperator:
     @staticmethod
     def is_personal_best(text):
-        text = int(str(text).replace('%',""))
+        text = int(str(text).replace('%', ""))
         return "r.ż." if text != "-" and text > 99 else ""
 
     @staticmethod
