@@ -3,7 +3,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.filechooser import FileChooserListView
-from kivy.clock import mainthread  # Import mainthread decorator
+from kivy.clock import mainthread
+from kivy.uix.popup import Popup
 import re
 from PDFReader import PDFReader
 from StringGroupingSystem import StringGroupingSystem
@@ -12,18 +13,24 @@ from CustomScrollView import CustomScrollView
 
 
 class PDFParserApp(App):
+    def __init__(self, **kwargs):
+        super(PDFParserApp, self).__init__(**kwargs)
+        self.layout = None
+        self.file_chooser = None
+        self.file_path_label = None
+
     def build(self):
         self.layout = BoxLayout(orientation='vertical')
         self.current_view = None
 
         self.file_chooser = FileChooserListView(filters=["*.pdf"])
-        self.layout.add_widget(self.file_chooser)
-
         select_button = Button(text="Select File", size_hint=(1, None), height=50)
         select_button.bind(on_press=self.display_grouping_options)
-        self.layout.add_widget(select_button)
 
         self.file_path_label = Label(text="")
+
+        self.layout.add_widget(self.file_chooser)
+        self.layout.add_widget(select_button)
         self.layout.add_widget(self.file_path_label)
 
         return self.layout
@@ -43,10 +50,29 @@ class PDFParserApp(App):
             button_athletes = Button(text='Zawodnicy', on_press=self.on_button_athletes_press)
             button_distances = Button(text='Dystanse', on_press=self.on_button_distances_press)
             button_exit = Button(text='Wyjście', on_press=self.exit_app)
+            button_select_another_file = Button(text='Wybierz inny plik', on_press=self.select_another_file)
 
             self.layout.add_widget(button_athletes)
             self.layout.add_widget(button_distances)
             self.layout.add_widget(button_exit)
+            self.layout.add_widget(button_select_another_file)
+
+    def select_another_file(self, instance):
+        self.file_chooser.path = '.'  # Otwiera domyślną lokalizację
+        self.file_chooser.selection = []  # Czyści wybór pliku
+        self.file_path_label.text = ""
+
+        self.layout.clear_widgets()
+
+        self.file_chooser = FileChooserListView(filters=["*.pdf"], path='C:\\')
+        select_button = Button(text="Select File", size_hint=(1, None), height=50)
+        select_button.bind(on_press=self.display_grouping_options)
+
+        self.file_path_label = Label(text="")
+
+        self.layout.add_widget(self.file_chooser)
+        self.layout.add_widget(select_button)
+        self.layout.add_widget(self.file_path_label)
 
     def on_button_athletes_press(self, instance):
         self.number = 1
@@ -94,10 +120,28 @@ class PDFParserApp(App):
         back_button.bind(on_press=self.display_grouping_options)
         self.layout.add_widget(back_button)
 
-    @staticmethod
     def exit_app(self, instance):
-        App.get_running_app().stop()
+        content = BoxLayout(orientation='vertical')
+        content.add_widget(Label(text="Czy na pewno chcesz wyjść?"))
+        yes_button = Button(text="Tak", size_hint=(1, None), height=50)
+        no_button = Button(text="Nie", size_hint=(1, None), height=50)
+
+        def close_app(instance):
+            App.get_running_app().stop()
+
+        def dismiss_popup(instance):
+            popup.dismiss()
+
+        yes_button.bind(on_press=close_app)
+        no_button.bind(on_press=dismiss_popup)
+
+        content.add_widget(yes_button)
+        content.add_widget(no_button)
+
+        popup = Popup(title="Wyjście", content=content, size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 
 if __name__ == '__main__':
     PDFParserApp().run()
+
