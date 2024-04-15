@@ -64,7 +64,7 @@ class PDFParserApp(App):
 
         self.layout.clear_widgets()
 
-        self.file_chooser = FileChooserListView(filters=["*.pdf"], path='C:\\')
+        self.file_chooser = FileChooserListView(filters=["*.pdf"], path="/sdcard")
         select_button = Button(text="Select File", size_hint=(1, None), height=50)
         select_button.bind(on_press=self.display_grouping_options)
 
