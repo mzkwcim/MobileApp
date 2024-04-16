@@ -44,7 +44,7 @@ class PDFParserApp(App):
             self.file_path_label.text = selected_file
             self.layout.add_widget(self.file_path_label)
 
-            label = Label(text="Chcesz pogrupować wyniki po zawodnikach czy po dystansach?")
+            label = Label(text="Do you want to group results by events or athletes")
             self.layout.add_widget(label)
 
             button_athletes = Button(text='Zawodnicy', on_press=self.on_button_athletes_press)
@@ -58,8 +58,8 @@ class PDFParserApp(App):
             self.layout.add_widget(button_select_another_file)
 
     def select_another_file(self, instance):
-        self.file_chooser.path = '.'  # Otwiera domyślną lokalizację
-        self.file_chooser.selection = []  # Czyści wybór pliku
+        self.file_chooser.path = '.'  # it opens default path
+        self.file_chooser.selection = []  # cleans file choice
         self.file_path_label.text = ""
 
         self.layout.clear_widgets()
@@ -112,17 +112,17 @@ class PDFParserApp(App):
 
         scroll_view.update_output_text(output_text)
 
-        copy_button = Button(text='Kopiuj do schowka', size_hint=(1, None), height=50)
+        copy_button = Button(text='Copy to clipboard', size_hint=(1, None), height=50)
         copy_button.bind(on_press=scroll_view.copy_to_clipboard)
         self.layout.add_widget(copy_button)
 
-        back_button = Button(text='Wróć do menu', size_hint=(1, None), height=50)
+        back_button = Button(text='Back to menu', size_hint=(1, None), height=50)
         back_button.bind(on_press=self.display_grouping_options)
         self.layout.add_widget(back_button)
 
     def exit_app(self, instance):
         content = BoxLayout(orientation='vertical')
-        content.add_widget(Label(text="Czy na pewno chcesz wyjść?"))
+        content.add_widget(Label(text="Do you realy want to quit?"))
         yes_button = Button(text="Tak", size_hint=(1, None), height=50)
         no_button = Button(text="Nie", size_hint=(1, None), height=50)
 
@@ -138,7 +138,7 @@ class PDFParserApp(App):
         content.add_widget(yes_button)
         content.add_widget(no_button)
 
-        popup = Popup(title="Wyjście", content=content, size_hint=(None, None), size=(400, 200))
+        popup = Popup(title="Exit", content=content, size_hint=(None, None), size=(400, 200))
         popup.open()
 
 
