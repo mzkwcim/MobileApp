@@ -12,11 +12,8 @@ class PDFReader:
                 page = pdf_reader.pages[page_number - 1]
                 text += page.extract_text()
 
-        print("Na starcie " + text.split('\n')[1])
+        print(text.split('\n')[1])
 
-        # W tym fragmencie zastępujemy Regex.Replace używając wyrażeń regularnych Pythona
-        # Następnie dzielimy tekst na linie za pomocą '\n' i filtrujemy te, które spełniają nasze kryteria
-        # Należy zwrócić uwagę, że to jest przykładowa implementacja, która może wymagać dostosowania
         start_index = text.find("KS Posnania Poznań")
         end_index = text.find("KS Warta Poznań")
         converted_text = re.sub(r' - Strona \d+', '', text[start_index:end_index])
