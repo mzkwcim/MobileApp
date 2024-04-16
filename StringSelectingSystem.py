@@ -1,5 +1,5 @@
 import re
-from StringOperator import StringOperator  # Załóżmy, że istnieje moduł string_operator zdefiniowany gdzieś indziej
+from StringOperator import StringOperator 
 
 
 class StringSelectingSystem:
